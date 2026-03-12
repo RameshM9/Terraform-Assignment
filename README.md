@@ -35,24 +35,19 @@ Before we begin with deployment, we should make sure have below requirements
 
 Before we create multiple resources using terraform scripts. We should first create a storage account to save terraform state file.
 
-For that,
-
-        - open git bash terminal in VS code and navigate to the source code folder evertzpocsandboxsb1
-        - alter the following variable values in shell script initial_setup.sh [resourceGroupName,storageAccountName,containerName,location,sku,subscriptionName]
-        - run the script after saving the changes (login to azure account when prompts)
 
 # Creating or Modifying the Azure Infrastructure
 
 1. Login to Azure from VS code (if not connected before)
-    ```
+  
     az login --tenant "enter organization domain"
-    ```
+   
 2.  Set the Azure subscription in your system by running below commands
-    ```
+    
     az account show
     az account set --subscription="enter the subscription name"
-    ```
-3.  Once the correct subscription is set then open terraform.tfvars file form evertzpocsandboxsb1tfvars.
+ 
+3.  Once the correct subscription is set then open terraform.tfvars file form 
 4.  Make the changes to the values as per your resource requirements and save the file.
 5. The cloud-init script in this project performs the following steps:
 
@@ -168,7 +163,22 @@ Automation Account and Log Analytics must be in the same region for Update Manag
 3.3 Troubleshooting
 
 
+# #######  Terraform Folder Structure ###############################
 
+├───app-infra-setup
+│   └───modules
+│       ├───app_nodes_module
+│       ├───infra_modules
+│       │   ├───azure-nsg
+│       │   ├───azure-rg
+│       │   ├───azure-subnet
+│       │   ├───azure-vms
+│       │   └───azure-vnet
+│       └───system_patch_mgmt_modules
+│           ├───azure_automation_account
+│           ├───azure_log_analytics
+│           └───azure_update_management
+└───pipelines
 
 
 

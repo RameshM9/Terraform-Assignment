@@ -55,8 +55,8 @@ depends_on = [ module.vnet.vnetname, module.nsg.nsg_id ]
 # Module Virtual_Networks_Peering
 
 data "azurerm_virtual_network" "dev_vnet" {
-  name                 = var.evertz_dev_vnet_name
-  resource_group_name  = var.evertz_dev_vnet-rg_name
+  name                 = var.webapp_dev_vnet_name
+  resource_group_name  = var.webapp_dev_vnet-rg_name
 }
 
 data "azurerm_subnet" "project_subnets" {
@@ -93,10 +93,6 @@ module "nodes" {
   m_auto_shutdown_details = each.value.manage_auto_shutdown
   m_tags = var.tags
 
-
-  m_associate_azure_monitor = lower(var.associate_dcr_to_all_nodes) == "yes" ? "yes" : "no"
- # m_dcrid = data.azurerm_monitor_data_collection_rule.dcr.id
-
 depends_on = [ module.snet]
 }
 
@@ -112,13 +108,6 @@ resource "null_resource" "configure_cluster" {
 
 
   provisioner "remote-exec" {
-    inline = [
-      "set -x",
-      "sudo sed -i 's/Operator/WEBSERVER-${count.index}/g' /etc/vue/models",
-      "/opt/webapp/bin/python /tmp/configure_system_io.py -v ${var.video_standard} -i 0 -o 0 -m 0",
-      "sudo start dcscloudbootstrap",
-      "sudo dcs restart"
-    ]
     connection {
       host =  lower(var.node_details["WEBSERVER"].create_node_public_ip) == "yes" ? element(concat(module.nodes["WEBSERVER"].node_pub_ip), count.index) : element(concat(module.nodes["WEBSERVER"].node_priv_ip), count.index)
       user = var.node_details["WEBSERVER"].username
@@ -187,7 +176,105 @@ output "WEBSERVER_Private_IPs" {
   value = var.node_details["WEBSERVER"].node_count > 0 ? module.nodes["WEBSERVER"].node_priv_ip : ["Private IP is not assigned [or] No Node is Created"]
 }
 
+#################### System Patch Management ############################
 
+# -------------------
+# Inputs (see variables.tf for all)
+# -------------------
+# data "azurerm_resource_group" "rg" {
+#   name = var.resource_group_name
+# }
+
+# Existing VM to onboard to Update Management
+data "azurerm_virtual_machine" "vm" {
+  name                = var.vm_name
+  resource_group_name = var.m_rgname
+}
+
+# -------------------
+# Modules
+# -------------------
+module "la" {
+  source         = "./modules/log_analytics"
+  name           = "${var.prefix}-law"
+  location       = data.azurerm_resource_group.rg.location
+  resource_group = data.azurerm_resource_group.rg.name
+}
+
+module "aa" {
+  source         = "./modules/automation_account"
+  name           = "${var.prefix}-aa"
+  location       = data.azurerm_resource_group.rg.location
+  resource_group = data.azurerm_resource_group.rg.name
+}
+
+module "um" {
+  source                  = "./modules/update_management"
+  resource_group          = data.azurerm_resource_group.rg.name
+  location                = data.azurerm_resource_group.rg.location
+  automation_account_id   = module.aa.id
+  automation_account_name = module.aa.name
+  workspace_id            = module.la.id
+  workspace_name          = module.la.name
+
+  suc_name         = "${var.prefix}-weekly-suc"
+  os_type          = var.vm_os_type                 # "Windows" or "Linux"
+  azure_vm_ids     = [data.azurerm_virtual_machine.vm.id]
+
+  # Schedule: weekly Saturday 02:00 IST (Fri 20:30 UTC). Adjust as needed.
+  start_time_utc   = var.suc_start_time_utc         # e.g., "2026-03-13T20:30:00Z"
+  time_zone        = "India Standard Time"
+  week_days        = ["Saturday"]
+  duration_iso     = "PT2H"
+  reboot_setting   = "IfRequired"
+}
+
+# -------------------
+# Onboard VM to Log Analytics (agent extension)
+# -------------------
+
+# WINDOWS VM: MicrosoftMonitoringAgent
+resource "azurerm_virtual_machine_extension" "mma_windows" {
+  count                       = var.vm_os_type == "Windows" ? 1 : 0
+  name                        = "MicrosoftMonitoringAgent"
+  virtual_machine_id          = data.azurerm_virtual_machine.vm.id
+  publisher                   = "Microsoft.EnterpriseCloud.Monitoring"
+  type                        = "MicrosoftMonitoringAgent"
+  type_handler_version        = "1.0"
+  auto_upgrade_minor_version  = true
+
+  settings = jsonencode({
+    workspaceId = module.la.workspace_id
+  })
+
+  protected_settings = jsonencode({
+    workspaceKey = module.la.primary_shared_key
+  })
+}
+
+# LINUX VM: OmsAgentForLinux
+resource "azurerm_virtual_machine_extension" "mma_linux" {
+  count                       = var.vm_os_type == "Linux" ? 1 : 0
+  name                        = "OmsAgentForLinux"
+  virtual_machine_id          = data.azurerm_virtual_machine.vm.id
+  publisher                   = "Microsoft.EnterpriseCloud.Monitoring"
+  type                        = "OmsAgentForLinux"
+  type_handler_version        = "1.13"
+  auto_upgrade_minor_version  = true
+
+  settings = jsonencode({
+    workspaceId = module.la.workspace_id
+  })
+
+  protected_settings = jsonencode({
+    workspaceKey = module.la.primary_shared_key
+  })
+}
+
+# Helpful outputs
+output "automation_account_name" { value = module.aa.name }
+output "log_analytics_workspace" { value = module.la.name }
+output "suc_id"                  { value = module.um.software_update_configuration_id }
 
 
 
