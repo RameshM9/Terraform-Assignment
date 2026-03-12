@@ -78,7 +78,7 @@ existing_dcr = {
 
 # Below declared variables creates Application Nodes in the provided subnet with the given values
 
-associate_dcr_to_all_nodes = "yes"
+
 
 node_details = {
     WEBSERVER ={ 
@@ -94,24 +94,6 @@ node_details = {
        #manage_data_disk         = {create_managed_disk  = "yes" , datadisk_type  = "Standard_LRS" , datadisk_size_gb = "128"}
 
     } 
-}
-
-############## Operational Parameters ##############
-# Default video standard configuration.
-
-video_standard = "1080p5994"
-
-# Module Role Assignment for users
-# Below declared variables provides Role Definition to the users for resource group
-# This variable will allow assigning role definitions to users i.e., keys(userroles).
-
-run_urole_module = "No" 
-
-userroles = { 
-     
-    "userone@tfdemo.net" = {rg_index = 0 , role_defs = ["Reader"]},
-    "usertwo@tfdemo.net"  = {rg_index = 0 , role_defs = ["Owner", "Reader"]},
-    "userthree@tfdemo.net"   = {rg_index = 0 , role_defs = ["Owner","Reader"]}
 }
 
 # Module Virtual_Machine
