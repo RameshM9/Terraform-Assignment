@@ -16,9 +16,7 @@ Before we begin with deployment, we should make sure have below requirements
 
         a. Download Terraform setup from this link (https://developer.hashicorp.com/terraform/downloads)
         b. For linux, follow the given commands in the above link.
-        c. For Windows after downloading amd64(terraform zip file), extract the terraform.exe file at any path.
-        d. Create a folder named Terraform in CProgram Files and copy the above terraform.exe in it.
-        e. Now add PATH CProgram FilesTerraform in system environment variables. (this will make terraform commands to be utilized in command prompts,IDEs and terminals)
+        c. Now add PATH CProgram FilesTerraform in system environment variables. (this will make terraform commands to be utilized in command prompts,IDEs and terminals)
 
 3.  Download and Install Azure CLI form this link (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
 
@@ -60,19 +58,21 @@ Also, when you initialize the terraform from your local system, it will save the
     az account show
     az account set --subscription="enter the subscription name"
     ```
-3.  Once the correct subscription is set then open sandbox_env.tfvars file form evertzpocsandboxsb1tfvars.
+3.  Once the correct subscription is set then open terraform.tfvars file form evertzpocsandboxsb1tfvars.
 4.  Make the changes to the values as per your resource requirements and save the file.
-5.  Now run the below terraform commands to plan and apply.
+5. The cloud-init script in this project performs the following steps:
 
-    a. To createmodify resources from all the modules with specific tfvar file
+Updates the package repository
+Installs NGINX
+Enables NGINX to start on reboot
+Starts the NGINX service immediately
+(Optional) Creates a simple HTML landing page
 
-        terraform plan -var-file .tfvarssandbox_env.tfvars
-        terraform apply -var-file .tfvarssandbox_env.tfvars -auto-approve
+As a result, once Terraform finishes:
 
-    b. To createmodify resources from specific module with specific tfvar file
-
-        terraform plan -target module.rg -var-file .tfvarssandbox_env.tfvars
-        terraform apply -target module.rg -var-file .tfvarssandbox_env.tfvars
+The VM is already running
+NGINX is installed and active
+The web server is accessible via the VM’s public IP on port 80 
 
 
 
