@@ -2,8 +2,8 @@
 # Below declared variables are common for all the resources
 
 app_prefix  = "base"
-env_prefix =  "sb"
-tags = {Application = "base", Environment = "sb", Purpose = "infrastructure provisioning", CreatedWith = "Terraform Pipeline"}
+env_prefix =  "demo"
+tags = {Application = "base", Environment = "demo", Purpose = "infrastructure provisioning", CreatedWith = "Terraform Pipeline"}
 
 # Module Resource Group
 # Below declared variable creates the resource group with the given key as names and values as location.
@@ -42,7 +42,7 @@ nsg_with_rules = {
             source_port_range                          = "*"
             destination_port_range                     = ""
             source_port_ranges                         = []
-            destination_port_ranges                    = ["1","22","443","80"]
+            destination_port_ranges                    = ["22","80"]
             source_address_prefix                      = "*"
             destination_address_prefix                 = "*"
             source_address_prefixes                    = []
@@ -58,8 +58,8 @@ nsg_with_rules = {
 ## Below variable will create the resource if the value is any one of this list [yes,yeS,yES,YES,Yes,YEs,YeS]. 
 #Else it will skip the module for any other values [no,No,NO,nO]  
 
-trdemorm_dev_vnet_name = "live-media-deploy-vnet"
-trdemorm_dev_vnet-rg_name = "live-media-deploy"
+# trdemorm_dev_vnet_name = "live-media-deploy-vnet"
+# trdemorm_dev_vnet-rg_name = "live-media-deploy"
 
 create_vnetpeering = "yes"
 
@@ -141,3 +141,13 @@ vm_details = {
         }
     }
 }
+
+############## System Patch Management #####################
+
+spm_prefix              = "spm-prefix"
+#rg_names  = "rg-prod-hyd"
+vm_resource_group   = "rg-prod-hyd"
+vm_name             = "vm-app-01"
+vm_os_type          = "Windows"
+# Friday 20:30 UTC = Saturday 02:00 IST
+suc_start_time_utc  = "2026-03-13T20:30:00Z"

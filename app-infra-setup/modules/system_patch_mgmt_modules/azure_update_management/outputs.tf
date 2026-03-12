@@ -1,0 +1,1 @@
+output "software_update_configuration_id" { value = azurerm_automation_software_update_configuration.suc.id }
