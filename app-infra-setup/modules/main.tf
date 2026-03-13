@@ -73,48 +73,7 @@ data "azurerm_subnet" "project_subnets" {
 data "azurerm_user_assigned_identity" "uami" {
   name                = var.existing_uami.name 
   resource_group_name = var.existing_uami.rg
-}
-module "nodes" {
-  for_each = var.node_details
-  source = "./modules/app_nodes_module"
-  m_create_node_public_ip = each.value.create_node_public_ip
-  m_subnet_id = module.snet[each.value.subnet_index].subnet_id
-  m_node_count = each.value.node_count
-  m_nodename = "${var.app_prefix}-${var.rg_names[each.value.rg_index].location_prefix}-${var.env_prefix}-${each.key}"
-  m_uamiid = data.azurerm_user_assigned_identity.uami.id
-  m_data_disk_details = each.value.manage_data_disk
-  m_location = module.rg[each.value.rg_index].rg_location
-  m_rgname = module.rg[each.value.rg_index].rg_name
-  m_nodesize = each.value.size
-  m_username = each.value.username
-  m_password = each.value.password
-  m_os_disk_storage_account_type = each.value.os_disk_type
-  m_disk_size_gb = each.value.os_disk_size_gb
-  m_auto_shutdown_details = each.value.manage_auto_shutdown
-  m_tags = var.tags
-
-depends_on = [ module.snet]
-}
-
-
-resource "null_resource" "configure_cluster" {
-  depends_on = [ module.vnet-peering , module.nodes ]
-  count = sum(values(var.node_details).*.node_count) > 0 ? 1 : 0
-  triggers = {
-    all_instance_private_ips = join(",", concat(module.nodes["WEBSERVER"].node_priv_ip)) 
-  }
- 
-}
-
-
-  provisioner "remote-exec" {
-    connection {
-      host =  lower(var.node_details["WEBSERVER"].create_node_public_ip) == "yes" ? element(concat(module.nodes["WEBSERVER"].node_pub_ip), count.index) : element(concat(module.nodes["WEBSERVER"].node_priv_ip), count.index)
-      user = var.node_details["WEBSERVER"].username
-      password = var.node_details["WEBSERVER"].password
-    }
-  }
-
+} 
 
 # Module Virtual_Machine
 

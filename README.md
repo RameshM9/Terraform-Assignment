@@ -179,12 +179,3 @@ Automation Account and Log Analytics must be in the same region for Update Manag
 │           ├───azure_log_analytics
 │           └───azure_update_management
 └───pipelines
-
-
-
-
-
-
-
-
-
