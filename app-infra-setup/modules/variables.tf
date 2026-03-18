@@ -69,7 +69,7 @@ variable "webapp_dev_vnet_name" {
   type = string
   description = "provide the name of existing vnet which will pull the data and can be used to peer with newly creating vnet"
 }
-variable "webapp__dev_vnet-rg_name" {
+variable "webapp_dev_vnet-rg_name" {
   type = string
   description = "provide the resourece group name of existing vnet which will pull the data and can be used to peer with newly creating vnet"
 }
@@ -92,23 +92,6 @@ variable "associate_dcr_to_all_nodes" {
   type = string
   description = "For Associating data collection rule if said yes else skip the same"
   default = "yes"
-}
-
-variable "node_details" {
-  type = map(object({
-    rg_index = number
-    subnet_index = number
-    node_count = number
-    create_node_public_ip = string
-    size = string
-    username = string
-    password = string
-    os_disk_type = string
-    os_disk_size_gb = number
-    manage_data_disk = map(string)
-    manage_auto_shutdown = map(string)
-    source_image = map(string)
-  }))
 }
 
 

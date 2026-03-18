@@ -59,21 +59,21 @@ data "azurerm_virtual_network" "dev_vnet" {
   resource_group_name  = var.webapp_dev_vnet-rg_name
 }
 
-data "azurerm_subnet" "project_subnets" {
-  for_each            = toset(data.azurerm_virtual_network.dev_vnet.subnets)
-  name                 = each.value
-  virtual_network_name = "${data.azurerm_virtual_network.dev_vnet.name}"
-  resource_group_name  = "${data.azurerm_virtual_network.dev_vnet.resource_group_name}"
-}
+# data "azurerm_subnet" "project_subnets" {
+#   for_each            = toset(data.azurerm_virtual_network.dev_vnet.subnets)
+#   name                 = each.value
+#   virtual_network_name = "${data.azurerm_virtual_network.dev_vnet.name}"
+#   resource_group_name  = "${data.azurerm_virtual_network.dev_vnet.resource_group_name}"
+# }
 
  
 
 # Module for Creating Nodes
 
-data "azurerm_user_assigned_identity" "uami" {
-  name                = var.existing_uami.name 
-  resource_group_name = var.existing_uami.rg
-} 
+# data "azurerm_user_assigned_identity" "uami" {
+#   name                = var.existing_uami.name 
+#   resource_group_name = var.existing_uami.rg
+# } 
 
 # Module Virtual_Machine
 
@@ -113,8 +113,8 @@ module "vms" {
   m_location = module.rg[values(var.vm_details)[count.index].rg_index].rg_location
   m_rgname = module.rg[values(var.vm_details)[count.index].rg_index].rg_name
   m_vmsize = values(var.vm_details)[count.index].size
-  m_username = values(var.vm_details)[count.index].username
-  m_password = values(var.vm_details)[count.index].password
+  # m_username = values(var.vm_details)[count.index].username
+  # m_password = values(var.vm_details)[count.index].password
   m_os_disk_storage_account_type = values(var.vm_details)[count.index].disk_type
   m_disk_size_gb = values(var.vm_details)[count.index].disk_size_gb
   m_tags = var.tags
@@ -126,29 +126,7 @@ module "vms" {
   # cloud-init (must be base64-encoded)
   custom_data = base64encode(local.cloud_init)
 
-
-output "WEBSERVER_Public_IPs" {
-  value = lower(var.node_details["WEBSERVER"].create_node_public_ip) == "yes" ? module.nodes["WEBSERVER"].node_pub_ip : ["Public IP is not assigned to this node"]
-}
-
-output "WEBSERVER_Private_IPs" {
-  value = var.node_details["WEBSERVER"].node_count > 0 ? module.nodes["WEBSERVER"].node_priv_ip : ["Private IP is not assigned [or] No Node is Created"]
-}
-
 #################### System Patch Management ############################
-
-# -------------------
-# Inputs (see variables.tf for all)
-# -------------------
-# data "azurerm_resource_group" "rg" {
-#   name = var.resource_group_name
-# }
-
-# Existing VM to onboard to Update Management
-data "azurerm_virtual_machine" "vm" {
-  name                = var.vm_name
-  resource_group_name = var.m_rgname
-}
 
 # -------------------
 # Modules
@@ -191,25 +169,6 @@ module "um" {
 # -------------------
 # Onboard VM to Log Analytics (agent extension)
 # -------------------
-
-# WINDOWS VM: MicrosoftMonitoringAgent
-resource "azurerm_virtual_machine_extension" "mma_windows" {
-  count                       = var.vm_os_type == "Windows" ? 1 : 0
-  name                        = "MicrosoftMonitoringAgent"
-  virtual_machine_id          = data.azurerm_virtual_machine.vm.id
-  publisher                   = "Microsoft.EnterpriseCloud.Monitoring"
-  type                        = "MicrosoftMonitoringAgent"
-  type_handler_version        = "1.0"
-  auto_upgrade_minor_version  = true
-
-  settings = jsonencode({
-    workspaceId = module.la.workspace_id
-  })
-
-  protected_settings = jsonencode({
-    workspaceKey = module.la.primary_shared_key
-  })
-}
 
 # LINUX VM: OmsAgentForLinux
 resource "azurerm_virtual_machine_extension" "mma_linux" {

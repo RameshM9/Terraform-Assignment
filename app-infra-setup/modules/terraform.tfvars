@@ -76,25 +76,6 @@ existing_dcr = {
   rg = "tfdemo-devops"
 }
 
-# Below declared variables creates Application Nodes in the provided subnet with the given values
-
-
-
-node_details = {
-    WEBSERVER ={ 
-        node_count               = 1      
-        rg_index                 = 0
-        subnet_index             = 0
-        create_node_public_ip    = "yes"    
-        size                     = "Standard_F8s_v2"
-        username                 = "trdemorm"
-        password                 = "tfdemotest@123"
-        os_disk_type             = "Standard_LRS"
-        os_disk_size_gb          = 64
-       #manage_data_disk         = {create_managed_disk  = "yes" , datadisk_type  = "Standard_LRS" , datadisk_size_gb = "128"}
-
-    } 
-}
 
 # Module Virtual_Machine
 # Use this module only if you want to create general user vms
