@@ -167,23 +167,6 @@ Automation Account and Log Analytics must be in the same region for Update Manag
 
 ├───app-infra-setup
 │   └───modules
-│       ├───app_nodes_module
-│       ├───infra_modules
-│       │   ├───azure-nsg
-│       │   ├───azure-rg
-│       │   ├───azure-subnet
-│       │   ├───azure-vms
-│       │   └───azure-vnet
-│       └───system_patch_mgmt_modules
-│           ├───azure_automation_account
-│           ├───azure_log_analytics
-│           └───azure_update_management
-└───pipelines
-
-# After Terraform Folder Structure Modificaiton 
-
-├───app-infra-setup
-│   └───modules
 │       └───infra_modules
 │           ├───azure-nsg
 │           ├───azure-rg
